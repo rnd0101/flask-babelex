@@ -39,6 +39,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
+        'werkzeug',
         'Flask',
         'Babel>=1.0',
         'speaklater>=1.2',

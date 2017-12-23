@@ -9,3 +9,8 @@ extension with additional features:
 3. Does not reload localizations for each request.
 
 Flask-BabelEx is API-compatible with Flask-Babel.
+
+Contributors:
+
+In addition to Flask-Babel and Flask-BabelEx, @lautat (thread-safe force_locale, test for it)
+and @rnd0101 (fitting force_locale to BabelEx, etc) at github.

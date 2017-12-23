@@ -3,6 +3,8 @@ from __future__ import with_statement
 
 import sys
 import os
+from threading import Semaphore, Thread
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
@@ -232,6 +234,46 @@ class GettextTestCase(unittest.TestCase):
 
         with app2.test_request_context():
             assert 'de_DE' not in b2._default_domain.cache
+
+    def test_force_locale(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        with app.test_request_context():
+            assert str(babel.get_locale()) == 'de_DE'
+            with babel.force_locale('en_US'):
+                assert str(babel.get_locale()) == 'en_US'
+            assert str(babel.get_locale()) == 'de_DE'
+
+    def test_force_locale_with_threading(self):
+        app = flask.Flask(__name__)
+        b = babel.Babel(app)
+
+        @b.localeselector
+        def select_locale():
+            return 'de_DE'
+
+        semaphore = Semaphore(value=0)
+
+        def first_request():
+            with app.test_request_context():
+                with babel.force_locale('en_US'):
+                    assert str(babel.get_locale()) == 'en_US'
+                    semaphore.acquire()
+
+        thread = Thread(target=first_request)
+        thread.start()
+
+        try:
+            with app.test_request_context():
+                assert str(babel.get_locale()) == 'de_DE'
+        finally:
+            semaphore.release()
+            thread.join()
 
 if __name__ == '__main__':
     unittest.main()
