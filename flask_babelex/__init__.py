@@ -19,7 +19,7 @@ if os.environ.get('LC_CTYPE', '').lower() == 'utf-8':
     os.environ['LC_CTYPE'] = 'en_US.utf-8'
 
 from datetime import datetime
-from flask import _request_ctx_stack
+from flask import _request_ctx_stack, has_request_context
 from babel import dates, numbers, support, Locale
 from babel.support import NullTranslations
 from werkzeug import ImmutableDict
@@ -654,6 +654,16 @@ def get_domain():
 
     ctx.babel_domain = d
     return d
+
+def _get_current_context():
+    if has_request_context():
+        from flask import request
+        return request
+
+    from flask import current_app
+
+    if current_app:
+        return current_app
 
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
